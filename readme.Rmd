@@ -1,12 +1,11 @@
-SDS 322e Project
+# SDS 322e Project
 
-Team #: 12  
-Members: Mumin Ahmed, Luis Alberto Baez, John Brown, Vincent Chen, Clay Cohen, Felipe Dantas  
-Project title: “Determinants of Happiness in Rural Bangladesh”  
-Data set link: https://www.openicpsr.org/openicpsr/project/100177/version/V5/view
+### Team #: 12  
+### Members: Mumin Ahmed, Luis Alberto Baez, John Brown, Vincent Chen, Clay Cohen, Felipe Dantas  
+### Project title: “Determinants of Happiness in Rural Bangladesh”  
+### Data set link: https://www.openicpsr.org/openicpsr/project/100177/version/V5/view
 
-Project Description
-----------------------
+## Project Description
 In this project, we will explore data from a survey gathered in 2013 about determinants of happiness in rural Bangladesh. This dataset includes various socioeconomic and geographical variables that we will explore in order to create hypotheses about this population and how different variables affect the happiness of households in this region. 
 
 Goals
