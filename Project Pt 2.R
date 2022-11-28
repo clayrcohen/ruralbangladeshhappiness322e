@@ -114,27 +114,68 @@ rf1 <- randomForest(x = rf_x_data_train, y = rf_y_data_train, xtest = rf_x_data_
 varImpPlot(rf1, main = "Random Forest Variable Importance")
 
 
-#clustering 
+#clustering data into villages
 
 library(cluster)
 
 
-cluster_data <- rf_data %>% 
-  mutate(village = as.factor(village)) %>%
-  mutate(migrant_any = as.factor(migrant_any)) %>%
-  mutate(wrkstat = as.factor(wrkstat)) %>%
-  mutate(sex = as.factor(sex)) %>%
-  mutate(ownhouse = as.factor(ownhouse)) %>%
+#selecting data
+data_2 <- data %>%
+  select(newid, hsize1, village, migrant_any, wrkstat, age, sex, marital, happy, happy_future, ownhouse, mo_wageinc1, 
+         mo_nonwageinc1, mo_wageinc2, mo_nonwageinc2, happy_past, satcur_job, satcur_achieve, satcur_livstandard, satcur_health, satcur_safe, 
+         satcur_comm, satcur_finsec, satcur_leistime, satcur_socenv, satcur_fam, hrelig, religious, ownhouse, housetype, cookroom,
+         mainrooms, othrooms, bath_flush, bath_pitlat, bath_bucket,bath_hanging, washwater1, light1, electricity, naturalgas, generator, 
+         phone, cow, chicken ) %>%
+  mutate(hsize1 = as.numeric(hsize1)) %>%
+  mutate(age = as.numeric(age)) %>%
+  mutate(mo_wageinc1 = as.numeric(mo_wageinc1)) %>%
+  mutate(mo_nonwageinc1 = as.numeric(mo_nonwageinc1)) %>%
+  mutate(mo_wageinc2 = as.numeric(mo_wageinc2)) %>%
+  mutate(mo_nonwageinc2 = as.numeric(mo_nonwageinc2)) %>%
+  filter(happy != ".m") %>%
+  filter(happy_past != ".m") %>%
+  filter(happy_future != ".m") %>%
+  filter(satcur_job != ".n") %>%
+  filter(satcur_job != ".m" & satcur_achieve != ".m" & satcur_livstandard != ".m" & satcur_health != ".m" & satcur_safe != ".m" & satcur_comm != ".m" & satcur_finsec != ".m" & satcur_leistime != ".m" & satcur_socenv != ".m" & satcur_fam  != ".m") %>%
+  mutate(across(c("happy", "satcur_job", "satcur_achieve", "satcur_livstandard", "satcur_health", "satcur_safe", "satcur_comm", "satcur_finsec", "satcur_leistime", "satcur_socenv", "satcur_fam"), as.factor)) %>%
+  mutate(across(c("happy", "satcur_job", "satcur_achieve", "satcur_livstandard", "satcur_health", "satcur_safe", "satcur_comm", "satcur_finsec", "satcur_leistime", "satcur_socenv", "satcur_fam"), ~ fct_relevel(., c("Not at all satisfied", "Somewhat unsatisfied", "Satisfied", "Quite satisfied", "Completely satisfied")))) %>%
+  mutate(happy_past = as.factor(happy_past)) %>%
+  mutate(happy_past = fct_relevel(happy_past, c("Worse", "Same", "Better"))) %>%
+  mutate(happy_future = as.factor(happy_future)) %>%
+  mutate(happy_future = fct_relevel(happy_future, c("Worse", "Same", "Better"))) %>%
+  mutate(happy_agg = as.numeric(satcur_job) + as.numeric(satcur_achieve) + as.numeric(satcur_livstandard) + as.numeric(satcur_health) + as.numeric(satcur_safe) + as.numeric(satcur_comm) + as.numeric(satcur_finsec) + as.numeric(satcur_leistime) + as.numeric(satcur_socenv) + as.numeric(satcur_fam) - 10) %>%
+  mutate(class_2 = as.factor(happy_agg > 20)) %>%
+  mutate(total_monthly_income = mo_wageinc1 + mo_nonwageinc1 + mo_wageinc2 + mo_nonwageinc2)
 
-test_clust <- daisy(cluster_data, "gower")
+View(data_2)
 
-summary(test_clust)
+#selecting columns
+data_2 <- data_2 %>% select(-c(1,12:26))
 
+#converting cols to numeric
+data_2 <- data_2 %>% 
+  mutate(cow = as.numeric(cow)) %>% 
+  mutate(chicken = as.numeric(chicken))
+
+#converting characters to factors  
+data_2 <- data_2 %>% mutate_if(is.character,as.factor)
+
+#removing rows with nas
+data_2 <- data_2 %>% na.omit()
+
+#removing village column for clustering purpose
+testing_clustering <- data_2 %>% select(-village)
+
+
+#running clustering alg with new data
+test_clust_2 <- daisy(testing_clustering, "gower")
+
+summary(test_clust_2)
 
 #fit and visualize
-pam_fit <- pam(test_clust, diss = TRUE, k = 3)
+pam_fit <- pam(test_clust_2, diss = TRUE, k = 3)
 
-pam_fit$clustering
+#adding cluster as a column
+data_2 <- data_2 %>%  mutate(cluster=as.factor(pam_fit$clustering))
 
-cluster_data <- cluster_data %>%  mutate(cluster=as.factor(pam_fit$clustering))
-View(cluster_data)
+#test clustering accuracy
