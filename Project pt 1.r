@@ -6,6 +6,7 @@
 
 data <- Household
 
+View(data_1)
 
 for (i in 1:nrow(data)){
   if (data$mo_wageinc1[i] == ".n"){

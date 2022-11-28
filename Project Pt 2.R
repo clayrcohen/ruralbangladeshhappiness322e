@@ -113,3 +113,10 @@ rf1 <- randomForest(x = rf_x_data_train, y = rf_y_data_train, xtest = rf_x_data_
 
 varImpPlot(rf1, main = "Random Forest Variable Importance")
 
+
+#clustering 
+
+library(cluster)
+
+data %>% daisy(metric = "gower")
+View(data)
