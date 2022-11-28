@@ -118,5 +118,23 @@ varImpPlot(rf1, main = "Random Forest Variable Importance")
 
 library(cluster)
 
-data %>% daisy(metric = "gower")
-View(data)
+
+cluster_data <- rf_data %>% 
+  mutate(village = as.factor(village)) %>%
+  mutate(migrant_any = as.factor(migrant_any)) %>%
+  mutate(wrkstat = as.factor(wrkstat)) %>%
+  mutate(sex = as.factor(sex)) %>%
+  mutate(ownhouse = as.factor(ownhouse)) %>%
+
+test_clust <- daisy(cluster_data, "gower")
+
+summary(test_clust)
+
+
+#fit and visualize
+pam_fit <- pam(test_clust, diss = TRUE, k = 3)
+
+pam_fit$clustering
+
+cluster_data <- cluster_data %>%  mutate(cluster=as.factor(pam_fit$clustering))
+View(cluster_data)
