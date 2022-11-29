@@ -114,7 +114,7 @@ rf1 <- randomForest(x = rf_x_data_train, y = rf_y_data_train, xtest = rf_x_data_
 varImpPlot(rf1, main = "Random Forest Variable Importance")
 
 
-#clustering data into villages
+#clustering data into happiness aggregate levels
 
 library(cluster)
 
@@ -149,8 +149,14 @@ data_2 <- data %>%
 
 View(data_2)
 
+#creating levels for happy agg
+data_2 <- data_2 %>% mutate(happy_level = case_when(happy_agg < (40/3) ~ "Least",
+                                                    happy_agg >= (40/3) & happy_agg < ((40/3)*2) ~ "Middle",
+                                                    happy_agg >= ((40/3)*2) ~ "Most"))
+
+
 #selecting columns
-data_2 <- data_2 %>% select(-c(1,12:26))
+data_2 <- data_2 %>% select(-c(1,9,10,12:26,45))
 
 #converting cols to numeric
 data_2 <- data_2 %>% 
@@ -163,14 +169,29 @@ data_2 <- data_2 %>% mutate_if(is.character,as.factor)
 #removing rows with nas
 data_2 <- data_2 %>% na.omit()
 
-#removing village column for clustering purpose
-testing_clustering <- data_2 %>% select(-village)
-
+#data for clustering without happiness result var
+data_test_3 <- data_2 %>% select(-29)
 
 #running clustering alg with new data
-test_clust_2 <- daisy(testing_clustering, "gower")
+test_clust_2 <- daisy(data_test_3, "gower")
 
+test_clust_2
 summary(test_clust_2)
+
+#figuring out number of clusters!!
+#-------------------------
+sil_width<-vector() #empty vector to hold mean sil width
+
+for(i in 2:10){
+  kms <- kmeans(test_clust_2,centers=i) #compute k-means solution
+  sil <- silhouette(kms$cluster, dist(test_clust_2)) #get sil widths (clusterID, distance)
+  #gets clusterID from cluster finding alg, distances from distance alg
+  sil_width[i]<-mean(sil[,3]) #take averages (higher is better) (,3) because third value is the value of silhoutte score on individual datapoint that we are looking for 
+}
+
+ggplot() + 
+  geom_line(aes(x=1:10,y=sil_width)) +
+  scale_x_continuous(name="k",breaks=1:10)
 
 #fit and visualize
 pam_fit <- pam(test_clust_2, diss = TRUE, k = 3)
