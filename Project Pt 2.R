@@ -157,6 +157,7 @@ ggplot(rf_data_train, aes(x = age, y = happy_agg)) +
   geom_point() +
   geom_smooth(method = 'lm', se = F) +
   geom_text(x = 80, y = 26, label="y = -0.0595 x + 24.57, MSPE=23.97") +
+<<<<<<< HEAD
   labs(title = "Happiness vs. Age", x = "Age", y = "Aggregate Happiness")
 
 # multiple regression model
@@ -169,3 +170,6 @@ p2 <- predict(lm, rf_data_test)
 mean((rf_data_test$happy_agg - p2)^2) # mean squared prediction error
 
 
+=======
+  labs(title = "Happiness vs. Age", x = "Age", y = "Aggregate Happiness")
+>>>>>>> 7658b287287a0fb09371f1feb38a9d8164acb1a1
