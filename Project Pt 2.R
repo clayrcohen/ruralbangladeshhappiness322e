@@ -2,6 +2,7 @@
 #I am using the hosuehold data csv file in the most recent version
 #You should import the dataset manually from your computer and then select and hit import dataset again and make sure it is in your environment
 
+library(caret)
 library(readr)
 library(tidyverse)
 library(randomForest)
@@ -50,10 +51,6 @@ data_1 <- data %>%
   mutate(happy_future = fct_relevel(happy_future, c("Worse", "Same", "Better"))) %>%
   mutate(happy_agg = as.numeric(satcur_job) + as.numeric(satcur_achieve) + as.numeric(satcur_livstandard) + as.numeric(satcur_health) + as.numeric(satcur_safe) + as.numeric(satcur_comm) + as.numeric(satcur_finsec) + as.numeric(satcur_leistime) + as.numeric(satcur_socenv) + as.numeric(satcur_fam) - 10) %>%
   mutate(class_2 = as.factor(happy_agg > 20))
-  
-
-
-max(data_1$happy_agg)
 
 
 #graph 1: Happiness and income scatter plot divided by sex and faceted by village
@@ -66,9 +63,9 @@ data_1 %>%
   geom_point() +
   scale_x_continuous(limits = c(0, 30000)) +
   scale_y_continuous(limits = c(0, 40)) +
+  labs(title = "Happiness vs. Income", x = "Total Monthly Income", y = "Aggregate Happiness")
   theme_bw() +
-  geom_smooth(method = lm, se = F)
-
+  geom_smooth(method = 'lm', se = F)
 
 
 #graph 2: Happiness and age scatter plot divided by sex and faceted by village
@@ -79,9 +76,11 @@ data_1 %>%
   ggplot(aes(x = age, y = happy_agg, color = sex)) +
   geom_point() +
   theme_bw() +
+  labs(title = "Happiness vs. Age", x = "Age", y = "Aggregate Happiness") +
   geom_smooth(method = lm, se = F)
 
-#Random Forest
+
+#plot 3: Random Forest var importance
 
 rf_data <- data_1 %>%
   mutate(total_monthly_income = mo_wageinc1 + mo_nonwageinc1 + mo_wageinc2 + mo_nonwageinc2) %>%
@@ -90,7 +89,6 @@ rf_data <- data_1 %>%
 
 set.seed(346587)
 split_vec <- sample(x = nrow(rf_data), size = round(.8*nrow(rf_data)), replace = FALSE)
-
 
 rf_data_train <- rf_data %>%
   slice(split_vec)
@@ -110,8 +108,54 @@ rf_y_data_test <- rf_data_test$class_2
 
 rf1 <- randomForest(x = rf_x_data_train, y = rf_y_data_train, xtest = rf_x_data_test, ytest = rf_y_data_test, keep.forest=TRUE) 
 
-
 varImpPlot(rf1, main = "Random Forest Variable Importance")
+
+
+#graph 4: work status effect on happiness by gender
+
+data_1 %>%
+  select(wrkstat, happy_agg, sex) %>%
+  filter(wrkstat!=".m") %>%
+  na.omit() %>%
+  ggplot(aes(x = wrkstat, y= happy_agg, color=sex))+
+  geom_boxplot() +
+  theme_bw() +
+  labs(title = "Happiness vs. Employment Status", x = "Employment Status", y = "Aggregate Happiness")
+
+# random forest model
+
+rf_data <- data_1 %>%
+  mutate(total_monthly_income = mo_wageinc1 + mo_nonwageinc1 + mo_wageinc2 + mo_nonwageinc2) %>%
+  select(hsize1, village, migrant_any, wrkstat, age, sex, ownhouse, happy_agg, total_monthly_income) %>%
+  na.omit()
+
+set.seed(346587)
+split_vec <- sample(x = nrow(rf_data), size = round(.8*nrow(rf_data)), replace = FALSE)
+
+rf_data_train <- slice(rf_data, split_vec)
+rf_data_test <- anti_join(rf_data, rf_data_train)
+
+rf_x_data_train <- select(rf_data_train, !happy_agg)
+rf_y_data_train <- pull(rf_data_train, happy_agg)
+rf_x_data_test <- select(rf_data_test, !happy_agg)
+rf_y_data_test <- pull(rf_data_test, happy_agg)
+
+rf <- randomForest(x = rf_x_data_train, y = rf_y_data_train, xtest = rf_x_data_test, ytest = rf_y_data_test, keep.forest=TRUE) 
+
+rf
+
+# linear regression model
+
+lm <- lm(happy_agg ~ age, data=rf_data_train)
+lm
+p2 <- predict(lm, rf_data_test)
+mean((rf_data_test$happy_agg - p2)^2) # mean squared prediction error
+
+ggplot(rf_data_train, aes(x = age, y = happy_agg)) +
+  geom_point() +
+  geom_smooth(method = 'lm', se = F) +
+  geom_text(x = 80, y = 26, label="y = -0.0595 x + 24.57, MSPE=23.97") +
+  labs(title = "Happiness vs. Age", x = "Age", y = "Aggregate Happiness")
 
 
 #clustering data into happiness aggregate levels
@@ -148,6 +192,7 @@ data_2 <- data %>%
   mutate(total_monthly_income = mo_wageinc1 + mo_nonwageinc1 + mo_wageinc2 + mo_nonwageinc2)
 
 View(data_2)
+glimpse(data_2)
 
 #creating levels for happy agg
 data_2 <- data_2 %>% mutate(happy_level = case_when(happy_agg < (40/3) ~ "Least",
