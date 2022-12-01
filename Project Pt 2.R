@@ -68,6 +68,9 @@ data_1 %>%
   theme_bw()
 
 
+linear_1 = lm(happy_agg ~ total_monthly_income, data = rf_data)
+summary(linear_1) p-value:  0.965  
+
 #graph 2: Happiness and age scatter plot divided by sex and faceted by village
 
 data_1 %>%
@@ -79,6 +82,14 @@ data_1 %>%
   theme_bw() +
   labs(title = "Happiness vs. Age", x = "Age", y = "Aggregate Happiness")
 
+l2_data_1 <- rf_data %>% filter(sex == "Male")
+l2_data_2 <- rf_data %>% filter(sex == "Female")
+
+linear_2.1 = lm(happy_agg ~ age, data = l2_data_1)
+summary(linear_2.1) #p-value males = .171
+
+linear_2.2 = lm(happy_agg ~ age, data = l2_data_2)
+summary(linear_2.2) #p-value females = .0208 stat significant
 
 #plot 3: Random Forest var importance
 
@@ -121,6 +132,10 @@ data_1 %>%
   geom_boxplot() +
   theme_bw() +
   labs(title = "Happiness vs. Employment Status", x = "Employment Status", y = "Aggregate Happiness")
+
+linear_4 = lm(happy_agg ~ wrkstat, data = rf_data)
+summary(linear_4) #p-value: .4704    
+
 
 # random forest model
 
