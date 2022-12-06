@@ -73,8 +73,11 @@ data_1 %>%
   labs(title = "Happiness vs. Income", x = "Total Monthly Income", y = "Aggregate Happiness") +
   theme_bw()
 
+rf_data <- data_1 %>%
+      mutate(total_monthly_income = mo_wageinc1 + mo_nonwageinc1 + mo_wageinc2 + mo_nonwageinc2)
+
 linear_1 = lm(happy_agg ~ total_monthly_income, data = rf_data)
-summary(linear_1) #p-value:  0.965  
+summary(linear_1) #p-value:  0.953  
 
 
 #graph 2: Happiness and age scatter plot divided by sex and faceted by village
@@ -92,31 +95,26 @@ l2_data_1 <- rf_data %>% filter(sex == "Male")
 l2_data_2 <- rf_data %>% filter(sex == "Female")
 
 linear_2.1 = lm(happy_agg ~ age, data = l2_data_1)
-summary(linear_2.1) #p-value males = .171
+summary(linear_2.1) #p-value males = .2997
 
 linear_2.2 = lm(happy_agg ~ age, data = l2_data_2)
-summary(linear_2.2) #p-value females = .0208 stat significant
+summary(linear_2.2) #p-value females = .0240 stat significant
 
 
 # graph 3: Random Forest var importance
-
-rf_data <- data_1 %>%
+rf_data1 <- data_1 %>%
   mutate(total_monthly_income = mo_wageinc1 + mo_nonwageinc1 + mo_wageinc2 + mo_nonwageinc2) %>%
   select(hsize1, village, migrant_any, wrkstat, age, sex, ownhouse, class_2, total_monthly_income) %>%
   na.omit() 
-
 set.seed(346587)
 split_vec <- sample(x = nrow(rf_data), size = round(.8*nrow(rf_data)), replace = FALSE)
-
-rf_data_train <- rf_data %>%
+rf_data_train <- rf_data1 %>%
   slice(split_vec)
-
-rf_data_test <- rf_data %>%
+rf_data_test <- rf_data1 %>%
   anti_join(rf_data_train)
   
 rf_x_data_train <- rf_data_train %>%
   select(hsize1, village, migrant_any, wrkstat, age, sex, ownhouse, total_monthly_income)
-
 rf_y_data_train <- rf_data_train$class_2
   
 rf_x_data_test <- rf_data_test %>%
@@ -128,9 +126,7 @@ rf1 <- randomForest(x = rf_x_data_train, y = rf_y_data_train, xtest = rf_x_data_
 
 varImpPlot(rf1, main = "Random Forest Variable Importance")
 
-
 #graph 4: work status effect on happiness by gender
-
 data_1 %>%
   select(wrkstat, happy_agg, sex) %>%
   filter(wrkstat!=".m") %>%
@@ -141,7 +137,7 @@ data_1 %>%
   labs(title = "Happiness vs. Employment Status", x = "Employment Status", y = "Aggregate Happiness")
 
 linear_4 = lm(happy_agg ~ wrkstat, data = rf_data)
-summary(linear_4) #p-value: .4704    
+summary(linear_4) #p-value: .7237
  
 ```
 
@@ -150,15 +146,14 @@ summary(linear_4) #p-value: .4704
 ```{r}
 
 # random forest model
-
 rf_data <- data_1 %>%
   mutate(total_monthly_income = mo_wageinc1 + mo_nonwageinc1 + mo_wageinc2 + mo_nonwageinc2) %>%
   select(hsize1, village, migrant_any, wrkstat, age, sex, ownhouse, happy_agg, total_monthly_income) %>%
   filter(wrkstat != ".m") %>%
   filter(ownhouse != ".m") %>%
-  na.omit()
+  na.omit() 
 
-set.seed(346587)
+set.seed(1908)
 split_vec <- sample(x = nrow(rf_data), size = round(.8*nrow(rf_data)), replace = FALSE)
 
 rf_data_train <- slice(rf_data, split_vec)
