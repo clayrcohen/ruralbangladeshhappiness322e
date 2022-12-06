@@ -360,12 +360,35 @@ display: none;
 
 <div id="wrangling" class="section level1">
 <h1>Wrangling</h1>
-<pre class="r"><code>library(caret)
-library(readr)
-library(tidyverse)
-library(randomForest)
-
-Household &lt;- read_csv(&quot;Household.csv&quot;)</code></pre>
+<pre class="r"><code>library(caret)</code></pre>
+<pre><code>## Loading required package: ggplot2</code></pre>
+<pre><code>## Loading required package: lattice</code></pre>
+<pre class="r"><code>library(readr)
+library(tidyverse)</code></pre>
+<pre><code>## ── Attaching packages
+## ─────────────────────────────────────
+## tidyverse 1.3.2 ──</code></pre>
+<pre><code>## ✔ tibble  3.1.8      ✔ dplyr   1.0.10
+## ✔ tidyr   1.2.1      ✔ stringr 1.4.1 
+## ✔ purrr   0.3.4      ✔ forcats 0.5.2 
+## ── Conflicts ──────────────────────────────────────── tidyverse_conflicts() ──
+## ✖ dplyr::filter() masks stats::filter()
+## ✖ dplyr::lag()    masks stats::lag()
+## ✖ purrr::lift()   masks caret::lift()</code></pre>
+<pre class="r"><code>library(randomForest)</code></pre>
+<pre><code>## randomForest 4.7-1.1
+## Type rfNews() to see new features/changes/bug fixes.
+## 
+## Attaching package: &#39;randomForest&#39;
+## 
+## The following object is masked from &#39;package:dplyr&#39;:
+## 
+##     combine
+## 
+## The following object is masked from &#39;package:ggplot2&#39;:
+## 
+##     margin</code></pre>
+<pre class="r"><code>Household &lt;- read_csv(&quot;Household.csv&quot;)</code></pre>
 <pre><code>## Rows: 1430 Columns: 266
 ## ── Column specification ──────────────────────────────────────────────────────
 ## Delimiter: &quot;,&quot;
