@@ -25,4 +25,7 @@ Information about data
 
 References
 ------------
-	… dataset and code information
+Bhuiyan, Muhammad, and Szulga, Radek. The Tangail Survey: Household Level Census of 
+	Subjective Well-Being, Perceptions of Relative Economic Position, and International 
+	Migration: 2013 [Tangail, Bangladesh]. Ann Arbor, MI: Inter-university Consortium for 
+	Political and Social Research [distributor], 2021-11-10. https://doi.org/10.3886/E100177V5
